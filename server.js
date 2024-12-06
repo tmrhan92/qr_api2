@@ -93,18 +93,20 @@ app.delete('/api/products/:id', async (req, res) => {
 });
 
 app.patch('/api/products/reset', async (req, res) => {
-    try {
-        const result = await Product.updateMany({}, { isScanned: false });
-        console.log(`Products reset: ${result.modifiedCount}`); // log the count of updated products
-        res.status(200).json({
-            message: 'All products reset to unscanned status',
-            updatedCount: result.modifiedCount,
-        });
-    } catch (error) {
-        console.error('Error resetting scan status:', error);
-        res.status(500).json({ message: 'Error resetting scan status', error: error.message });
-    }
+  try {
+    const result = await Product.updateMany({}, { isScanned: false }); // إعادة تعيين جميع المنتجات إلى غير مسحوبة 
+    res.status(200).json({
+      message: 'All products reset to unscanned status',
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error('Error resetting scan status:', error); // طباعة الأخطاء
+    res.status(500).json({ message: 'Error resetting scan status', error: error.message });
+  }
 });
+
+
 app.get('/api/unscanned-products', async (req, res) => {
   try {
     const products = await Product.find({ isScanned: false });
