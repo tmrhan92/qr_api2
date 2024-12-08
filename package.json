@@ -12,10 +12,11 @@
   "dependencies": {
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
-    "express": "^4.21.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
     "firebase-admin": "^13.0.1",
     "helmet": "^8.0.0",
-    "mongoose": "^8.8.2",
+    "mongoose": "^8.8.4",
     "uuid": "^11.0.3"
   }
 }

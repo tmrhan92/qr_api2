@@ -5,6 +5,7 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   position: { type: String, required: true },
   qr: { type: String },
+  scannedDate: { type: Date }, // لتخزين تاريخ المسح
   isScanned: { type: Boolean, default: false },
 });
 

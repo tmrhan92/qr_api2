@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #e74c3c;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: calc(50% - 20px);
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #c0392b;
+        }
+        h2 {
+            margin-top: 30px;
+            color: #2c3e50;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #fff;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        form.inline {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+    <h1>إدارة المنتجات</h1>
+
+    <form action="/admin/products" method="POST">
+        <input type="text" name="name" placeholder="اسم المنتج" required>
+        <input type="text" name="position" placeholder="موضع المنتج" required>
+        <button type="submit">إضافة منتج</button>
+    </form>
+
+    <!-- زر إعادة تعيين جميع المنتجات -->
+    <form action="/api/products/reset" method="POST">
+        <button type="submit" style="background: #3498db;">إعادة تعيين جميع المنتجات إلى غير ممسوحة</button>
+    </form>
+
+    <h2>عدد المنتجات الممسوحة اليوم: <span id="scannedCount">0</span></h2>
+
+    <h2>قائمة المنتجات</h2>
+    <ul>
+        <% products.forEach(product => { %>
+            <li>
+                <span><%= product.name %> - <%= product.position %> - عدد مرات المسح: <%= product.scanCount %></span>
+                <form action="/admin/products/delete/<%= product._id %>" method="POST" class="inline">
+                    <button type="submit">حذف</button>
+                </form>
+            </li>
+        <% }); %>
+    </ul>
+
+    <script>
+        async function fetchScannedCount() {
+            const response = await fetch('/api/scanned-count');
+            const data = await response.json();
+            document.getElementById('scannedCount').innerText = data.scannedCount;
+        }
+
+        fetchScannedCount(); // جلب عدد المنتجات الممسوحة عند تحميل الصفحة
+    </script>
+</body>
+</html>
