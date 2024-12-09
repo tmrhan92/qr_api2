@@ -4,6 +4,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const Product = require('./models/product');
+const User = require('./models/user');
+
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -34,13 +40,13 @@ app.get('/', (req, res) => {
 app.get('/admin', async (req, res) => {
   try {
       const products = await Product.find();
-      res.render('admin', { products }); // إرسال البيانات إلى إيمينر
+      const locations = await Location.find(); // جلب المواقع
+      res.render('admin', { products, locations }); // إرسال المواقع إلى الواجهة
   } catch (error) {
       console.error('Error fetching products:', error);
       res.status(500).json({ message: 'Error fetching products', error });
   }
 });
-
 
 
 function generateProductId(name, position) {
@@ -115,6 +121,27 @@ app.post('/api/locations', async (req, res) => {
   }
 });
 
+
+// نقطة النهاية للتسجيل
+app.post('/api/register', async (req, res) => {
+  const { email, password } = req.body;
+  const hash = await bcrypt.hash(password, 10);
+  const user = new User({ email, password: hash });
+  await user.save();
+  res.status(201).send({ message: 'تم تسجيل المستخدم' });
+});
+
+// نقطة النهاية لتسجيل الدخول
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user || !await bcrypt.compare(password, user.password)) {
+    return res.status(401).send({ message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
+  }
+  const token = jwt.sign({ id: user._id }, 'your_jwt_secret');
+  res.send({ token });
+});
+
 // جلب جميع المواقع
 app.get('/api/locations', async (req, res) => {
   try {
@@ -165,6 +192,27 @@ app.get('/api/products', async (req, res) => {
     console.error('Error fetching products:', error);
     res.status(500).json({ message: 'Error fetching products', error });
   }
+});
+
+// نموذج للموقع
+const Location = require('./models/location'); // تأكد من أن لديك نموذج للموقع
+
+// نهاية لإضافة موقع جديد
+app.post('/admin/locations', async (req, res) => {
+    const { name } = req.body;
+
+    if (!name) {
+        return res.status(400).json({ message: 'اسم الموقع مطلوب' });
+    }
+
+    try {
+        const location = new Location({ name });
+        await location.save();
+        res.redirect('/admin'); // إعادة توجيه المستخدم إلى لوحة الإدارة بعد النجاح
+    } catch (err) {
+        console.error('خطأ في إضافة الموقع:', err);
+        res.status(500).json({ message: 'خطأ في إضافة الموقع', error: err.message });
+    }
 });
 
 app.patch('/api/products/:id', async (req, res) => {
