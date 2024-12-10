@@ -291,6 +291,8 @@ app.get('/api/unscanned-products', async (req, res) => {
   }
 });
 
-server.listen(10000, '0.0.0.0', () => {
-  console.log('Server is running on port 10000');
+const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0'; // التأكد أن التطبيق يستمع على جميع العناوين
+server.listen(PORT, HOST, () => {
+  console.log(`Server is running on http://${HOST}:${PORT}`);
 });
