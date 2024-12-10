@@ -291,7 +291,6 @@ app.get('/api/unscanned-products', async (req, res) => {
   }
 });
 
-const HOST = '192.168.43.181';
-app.listen(port, HOST, () => {
-  console.log(`Server running on http://${HOST}:${port}`);
+server.listen(10000, '0.0.0.0', () => {
+  console.log('Server is running on port 10000');
 });
