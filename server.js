@@ -159,6 +159,37 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// إضافة منتج جديد عبر API
+app.post('/api/products', async (req, res) => {
+  const { name, position, qr } = req.body;
+  
+  if (!name || !position || !qr) {
+    return res.status(400).json({ message: 'Name, position, and QR data are required' });
+  }
+
+  try {
+    const _id = generateProductId(name, position);
+    const existingProduct = await Product.findOne({ _id });
+    if (existingProduct) {
+      return res.status(409).json({ message: 'Product already exists with this ID' });
+    }
+
+    const product = new Product({
+      _id,
+      name,
+      position,
+      qr,
+    });
+
+    await product.save();
+    res.status(201).json({ message: 'Product created successfully', product });
+  } catch (err) {
+    console.error('Error adding product:', err);
+    res.status(500).json({ message: 'Error adding product', error: err.message });
+  }
+});
+
+
 // تحديث منتج
 app.patch('/api/products/:id', async (req, res) => {
   const { id } = req.params;
