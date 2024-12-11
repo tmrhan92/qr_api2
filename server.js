@@ -3,13 +3,21 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const Product = require('./models/product');
+const User = require('./models/user');
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// النماذج
-const Product = require('./models/product');
-const User = require('./models/user');
-const Location = require('./models/location'); // تأكد من وجود هذا الملف
+
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+
+// إعداد EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,9 +28,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// إعداد EJS
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 
 // الاتصال بقاعدة البيانات
 const mongoUri = process.env.MONGO_URI; // قراءة رابط الاتصال من متغير البيئة
