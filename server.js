@@ -206,6 +206,17 @@ app.delete('/api/products/:id', async (req, res) => {
     res.status(500).json({ message: 'Error deleting product', error: err.message });
   }
 });
+// مسار لجلب المنتجات غير الممسوحة
+app.get('/api/unscanned-products', async (req, res) => {
+  try {
+    const unscannedProducts = await Product.find({ isScanned: false });
+    res.status(200).json(unscannedProducts);
+  } catch (err) {
+    console.error('Error fetching unscanned products:', err);
+    res.status(500).json({ message: 'Error fetching unscanned products', error: err.message });
+  }
+});
+
 
 // تشغيل الخادم
 app.listen(PORT, HOST, () => {
