@@ -36,7 +36,7 @@ function generateProductId(name, position) {
   return `${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')}`;
 }
 
-// الرابط الجذر
+// رابط الجذر
 app.get('/', (req, res) => {
   res.redirect('/admin');
 });
@@ -44,42 +44,51 @@ app.get('/', (req, res) => {
 // واجهة الإدارة
 app.get('/admin', async (req, res) => {
   try {
-    const products = await Product.find();
-    const locations = await Location.find(); // جلب المواقع
-    res.render('admin', { products, locations }); // إرسال المواقع إلى الواجهة
+      const products = await Product.find();
+      const locations = await Location.find(); // جلب المواقع
+      res.render('admin', { products, locations }); // إرسال المواقع إلى الواجهة
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ message: 'Error fetching products', error });
+      console.error('Error fetching products:', error);
+      res.status(500).json({ message: 'Error fetching products', error });
   }
 });
 
-// إضافة منتج جديد
+
+function generateProductId(name, position) {
+  return `${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')}`;
+}
+
+
+
+
+// نقاط النهاية الأخرى (إضافة، تعديل، حذف)
 app.post('/admin/products', async (req, res) => {
   const { name, position } = req.body;
 
   if (!name || !position) {
-    return res.status(400).json({ message: 'Name and position are required' });
+      return res.status(400).json({ message: 'Name and position are required' });
   }
 
   try {
-    const _id = generateProductId(name, position); // استخدم دالة المعرف
-    const existingProduct = await Product.findOne({ _id });
-    if (existingProduct) {
-      return res.status(409).json({ message: 'Product already exists with this ID' });
-    }
+      const _id = generateProductId(name, position); // استخدم دالة المعرف
 
-    const product = new Product({
-      _id,
-      name,
-      position,
-      qr: JSON.stringify({ productName: name, productPosition: position, _id }),
-    });
+      const existingProduct = await Product.findOne({ _id });
+      if (existingProduct) {
+          return res.status(409).json({ message: 'Product already exists with this ID' });
+      }
 
-    await product.save();
-    res.redirect('/admin');
+      const product = new Product({
+          _id,
+          name,
+          position,
+          qr: JSON.stringify({ productName: name, productPosition: position, _id }),
+      });
+
+      await product.save();
+      res.redirect('/admin');
   } catch (err) {
-    console.error('Error adding product:', err);
-    res.status(500).json({ message: 'Error adding product', error: err.message });
+      console.error('Error adding product:', err);
+      res.status(500).json({ message: 'Error adding product', error: err.message });
   }
 });
 
@@ -88,34 +97,35 @@ app.post('/admin/products/delete/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedProduct = await Product.findByIdAndDelete(id);
-    if (!deletedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    res.redirect('/admin');
+      const deletedProduct = await Product.findByIdAndDelete(id);
+      if (!deletedProduct) {
+          return res.status(404).json({ message: 'Product not found' });
+      }
+      res.redirect('/admin');
   } catch (err) {
-    console.error('Error deleting product:', err);
-    res.status(500).json({ message: 'Error deleting product', error: err.message });
+      console.error('Error deleting product:', err);
+      res.status(500).json({ message: 'Error deleting product', error: err.message });
   }
 });
 
 // إضافة موقع جديد
-app.post('/admin/locations', async (req, res) => {
+app.post('/api/locations', async (req, res) => {
   const { name } = req.body;
 
   if (!name) {
-    return res.status(400).json({ message: 'اسم الموقع مطلوب' });
+    return res.status(400).json({ message: 'Location name is required' });
   }
 
   try {
     const location = new Location({ name });
     await location.save();
-    res.redirect('/admin');
+    res.status(201).json(location);
   } catch (err) {
-    console.error('خطأ في إضافة الموقع:', err);
-    res.status(500).json({ message: 'خطأ في إضافة الموقع', error: err.message });
+    console.error('Error adding location:', err);
+    res.status(500).json({ message: 'Error adding location', error: err.message });
   }
 });
+
 
 // نقطة النهاية للتسجيل
 app.post('/api/register', async (req, res) => {
@@ -130,7 +140,7 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  if (!user || !await bcrypt.compare(password, user.password)) {
     return res.status(401).send({ message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
   }
   const token = jwt.sign({ id: user._id }, 'your_jwt_secret');
@@ -148,7 +158,37 @@ app.get('/api/locations', async (req, res) => {
   }
 });
 
-// جلب جميع المنتجات
+
+app.post('/api/products', async (req, res) => {
+    const { name, position } = req.body;
+  
+    if (!name || !position) {
+      return res.status(400).json({ message: 'Name and position are required' });
+    }
+  
+    try {
+      const _id = generateProductId(name, position);
+      
+      const existingProduct = await Product.findOne({ _id });
+      if (existingProduct) {
+        return res.status(409).json({ message: 'Product already exists with this ID' });
+      }
+  
+      const product = new Product({
+        _id,
+        name,
+        position,
+        qr: JSON.stringify({ productName: name, productPosition: position, _id }),
+      });
+      
+      await product.save();
+      res.status(201).json(product);
+    } catch (err) {
+      console.error('Error adding product:', err);
+      res.status(500).json({ message: 'Error adding product', error: err.message });
+    }
+});
+
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find();
@@ -159,39 +199,63 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// تحديث منتج
+// نموذج للموقع
+const Location = require('./models/location'); // تأكد من أن لديك نموذج للموقع
+
+// نهاية لإضافة موقع جديد
+app.post('/admin/locations', async (req, res) => {
+    const { name } = req.body;
+
+    if (!name) {
+        return res.status(400).json({ message: 'اسم الموقع مطلوب' });
+    }
+
+    try {
+        const location = new Location({ name });
+        await location.save();
+        res.redirect('/admin'); // إعادة توجيه المستخدم إلى لوحة الإدارة بعد النجاح
+    } catch (err) {
+        console.error('خطأ في إضافة الموقع:', err);
+        res.status(500).json({ message: 'خطأ في إضافة الموقع', error: err.message });
+    }
+});
+
 app.patch('/api/products/:id', async (req, res) => {
   const { id } = req.params;
   const { isScanned } = req.body;
 
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { isScanned, scannedDate: isScanned ? new Date() : null, $inc: { scanCount: isScanned ? 1 : 0 } },
-      { new: true }
-    );
-    if (!updatedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    res.status(200).json(updatedProduct);
+      const updatedProduct = await Product.findByIdAndUpdate(
+          id,
+          { isScanned, scannedDate: isScanned ? new Date() : null, $inc: { scanCount: isScanned ? 1 : 0 } },
+          { new: true }
+      );
+      if (!updatedProduct) {
+          return res.status(404).json({ message: 'Product not found' });
+      }
+      res.status(200).json(updatedProduct);
   } catch (err) {
-    console.error('Error updating product:', err);
-    res.status(500).json({ message: 'Error updating product', error: err.message });
+      console.error('Error updating product:', err);
+      res.status(500).json({ message: 'Error updating product', error: err.message });
   }
 });
 
-// إعادة تعيين المنتجات إلى الحالة غير الممسوحة
-app.post('/api/products/reset', async (req, res) => {
+app.get('/api/scanned-count', async (req, res) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // تعيين الوقت لبدء اليوم
+
   try {
-    const result = await Product.updateMany({}, { isScanned: false, scannedDate: null, scanCount: 0 });
-    res.status(200).json({ message: 'تمت إعادة تعيين جميع المنتجات', updatedCount: result.modifiedCount });
+      const count = await Product.countDocuments({
+          scannedDate: { $gte: today } // عد المنتجات التي تم مسحها اليوم
+      });
+      res.status(200).json({ scannedCount: count });
   } catch (error) {
-    console.error('Error resetting scan status:', error);
-    res.status(500).json({ message: 'خطأ في إعادة التعيين', error: error.message });
+      console.error('Error fetching scanned count:', error);
+      res.status(500).json({ message: 'Error fetching scanned count', error });
   }
 });
 
-// حذف منتج
+
 app.delete('/api/products/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -206,17 +270,31 @@ app.delete('/api/products/:id', async (req, res) => {
     res.status(500).json({ message: 'Error deleting product', error: err.message });
   }
 });
-// مسار لجلب المنتجات غير الممسوحة
-app.get('/api/unscanned-products', async (req, res) => {
+
+// Reset all products to unscanned status
+app.post('/api/products/reset', async (req, res) => {
   try {
-    const unscannedProducts = await Product.find({ isScanned: false });
-    res.status(200).json(unscannedProducts);
-  } catch (err) {
-    console.error('Error fetching unscanned products:', err);
-    res.status(500).json({ message: 'Error fetching unscanned products', error: err.message });
+      const result = await Product.updateMany({}, { isScanned: false, scannedDate: null, scanCount: 0 });
+      console.log(`Products reset: ${result.modifiedCount}`); // سجل عدد المنتجات التي تم إعادة تعيينها
+      res.status(200).json({
+          message: 'جميع المنتجات تم إعادة تعيينها إلى حالة غير ممسوحة',
+          updatedCount: result.modifiedCount,
+      });
+  } catch (error) {
+      console.error('Error resetting scan status:', error);
+      res.status(500).json({ message: 'خطأ في إعادة تعيين حالة المسح', error: error.message });
   }
 });
 
+app.get('/api/unscanned-products', async (req, res) => {
+  try {
+    const products = await Product.find({ isScanned: false });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error fetching unscanned products:', error);
+    res.status(500).json({ message: 'Error fetching unscanned products', error });
+  }
+});
 
 // تشغيل الخادم
 app.listen(PORT, HOST, () => {
