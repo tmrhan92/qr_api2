@@ -3,21 +3,13 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
-const Product = require('./models/product');
-const User = require('./models/user');
-
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-
-// إعداد EJS
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// النماذج
+const Product = require('./models/product');
+const User = require('./models/user');
+const Location = require('./models/location'); // تأكد من وجود هذا الملف
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +20,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// إعداد EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // الاتصال بقاعدة البيانات
 const mongoUri = process.env.MONGO_URI; // قراءة رابط الاتصال من متغير البيئة
@@ -38,7 +33,7 @@ mongoose.connect(mongoUri)
 
 // الدالة لإنشاء معرف المنتج
 function generateProductId(name, position) {
-return `${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')}`;
+  return `${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')}`;
 }
 
 
@@ -61,7 +56,7 @@ app.get('/admin', async (req, res) => {
 
 
 function generateProductId(name, position) {
-  return `${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')}`;
+  return ${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')};
 }
 
 
@@ -167,33 +162,34 @@ app.get('/api/locations', async (req, res) => {
 
 app.post('/api/products', async (req, res) => {
     const { name, position } = req.body;
-  
+
     if (!name || !position) {
-      return res.status(400).json({ message: 'Name and position are required' });
+        return res.status(400).json({ message: 'Name and position are required' });
     }
-  
+
     try {
-      const _id = generateProductId(name, position);
-      
-      const existingProduct = await Product.findOne({ _id });
-      if (existingProduct) {
-        return res.status(409).json({ message: 'Product already exists with this ID' });
-      }
-  
-      const product = new Product({
-        _id,
-        name,
-        position,
-        qr: JSON.stringify({ productName: name, productPosition: position, _id }),
-      });
-      
-      await product.save();
-      res.status(201).json(product);
+        const _id = generateProductId(name, position);
+
+        const existingProduct = await Product.findOne({ _id });
+        if (existingProduct) {
+            return res.status(409).json({ message: 'Product already exists with this ID' });
+        }
+
+        const product = new Product({
+            _id,
+            name,
+            position,
+            qr: JSON.stringify({ productName: name, productPosition: position, _id }),
+        });
+
+        await product.save();
+        res.status(201).json(product);
     } catch (err) {
-      console.error('Error adding product:', err);
-      res.status(500).json({ message: 'Error adding product', error: err.message });
+        console.error('Error adding product:', err);
+        res.status(500).json({ message: 'Error adding product', error: err.message });
     }
 });
+
 
 app.get('/api/products', async (req, res) => {
   try {
@@ -281,7 +277,7 @@ app.delete('/api/products/:id', async (req, res) => {
 app.post('/api/products/reset', async (req, res) => {
   try {
       const result = await Product.updateMany({}, { isScanned: false, scannedDate: null, scanCount: 0 });
-      console.log(`Products reset: ${result.modifiedCount}`); // سجل عدد المنتجات التي تم إعادة تعيينها
+      console.log(Products reset: ${result.modifiedCount}); // سجل عدد المنتجات التي تم إعادة تعيينها
       res.status(200).json({
           message: 'جميع المنتجات تم إعادة تعيينها إلى حالة غير ممسوحة',
           updatedCount: result.modifiedCount,
@@ -301,8 +297,8 @@ app.get('/api/unscanned-products', async (req, res) => {
     res.status(500).json({ message: 'Error fetching unscanned products', error });
   }
 });
+
 // تشغيل الخادم
 app.listen(PORT, HOST, () => {
   console.log(Server is running on http://${HOST}:${PORT});
 });
-
