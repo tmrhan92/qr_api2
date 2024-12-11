@@ -25,7 +25,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // الاتصال بقاعدة البيانات
-mongoose.connect('mongodb+srv://totoada929:gwyTpPSQJFLFsp2@cluster0.mongodb.net/myDatabase?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://totoada929:gwyTpPSQJFLFsp2@cluster0.mongodb.net/Project0?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
