@@ -161,33 +161,34 @@ app.get('/api/locations', async (req, res) => {
 
 app.post('/api/products', async (req, res) => {
     const { name, position } = req.body;
-  
+
     if (!name || !position) {
-      return res.status(400).json({ message: 'Name and position are required' });
+        return res.status(400).json({ message: 'Name and position are required' });
     }
-  
+
     try {
-      const _id = generateProductId(name, position);
-      
-      const existingProduct = await Product.findOne({ _id });
-      if (existingProduct) {
-        return res.status(409).json({ message: 'Product already exists with this ID' });
-      }
-  
-      const product = new Product({
-        _id,
-        name,
-        position,
-        qr: JSON.stringify({ productName: name, productPosition: position, _id }),
-      });
-      
-      await product.save();
-      res.status(201).json(product);
+        const _id = generateProductId(name, position);
+
+        const existingProduct = await Product.findOne({ _id });
+        if (existingProduct) {
+            return res.status(409).json({ message: 'Product already exists with this ID' });
+        }
+
+        const product = new Product({
+            _id,
+            name,
+            position,
+            qr: JSON.stringify({ productName: name, productPosition: position, _id }),
+        });
+
+        await product.save();
+        res.status(201).json(product);
     } catch (err) {
-      console.error('Error adding product:', err);
-      res.status(500).json({ message: 'Error adding product', error: err.message });
+        console.error('Error adding product:', err);
+        res.status(500).json({ message: 'Error adding product', error: err.message });
     }
 });
+
 
 app.get('/api/products', async (req, res) => {
   try {
