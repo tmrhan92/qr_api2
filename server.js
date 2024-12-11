@@ -25,11 +25,12 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // الاتصال بقاعدة البيانات
-const mongoUri = process.env.MONGO_URI; // قراءة رابط الاتصال من متغير البيئة
-
-mongoose.connect(mongoUri)
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect('mongodb+srv://totoada929:gwyTpPSQJFLFsp2@cluster0.mongodb.net/myDatabase?retryWrites=true&w=majority', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB connected successfully'))
+.catch(err => console.error('MongoDB connection error:', err));
 
 // الدالة لإنشاء معرف المنتج
 function generateProductId(name, position) {
