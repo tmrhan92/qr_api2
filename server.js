@@ -13,7 +13,7 @@ const Location = require('./models/location'); // تأكد من وجود هذا 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = '176.29.26.172'; // يستمع على جميع العناوين
+const HOST = '0.0.0.0'; // يستمع على جميع العناوين
 
 // الإعدادات الوسيطة
 app.use(cors());
