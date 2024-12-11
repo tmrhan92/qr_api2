@@ -33,7 +33,7 @@ mongoose.connect(mongoUri)
 
 // الدالة لإنشاء معرف المنتج
 function generateProductId(name, position) {
-return `${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')}`;
+  return `${name.toLowerCase().replace(/\s+/g, '_')}_${position.toLowerCase().replace(/\s+/g, '_')}`;
 }
 
 
